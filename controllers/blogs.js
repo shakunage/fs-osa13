@@ -1,5 +1,8 @@
 const router = require('express').Router()
-const { Blog } = require('../models')
+const { Blog, User } = require('../models')
+const tokenExtractor  = require('./tokenExtractor')
+const { Op } = require("sequelize");
+
 
 const blogFinder = async (req, res, next) => {
     try {
@@ -16,13 +19,31 @@ const blogFinder = async (req, res, next) => {
   }
 
 router.get('/', async (req, res) => {
-    const blogs = await Blog.findAll()
+
+    const search = req.query.search ? req.query.search : '';
+
+    const blogs = await Blog.findAll({
+        include: {
+          model: User
+        },
+        where: {
+            [Op.or]: [
+              { title: { [Op.substring]: search } },
+              { author: { [Op.substring]: search } }
+            ]
+        },
+        order: [
+            // Will escape title and validate DESC against a list of valid direction parameters
+            ['likes', 'DESC']
+        ]
+      })
     res.json(blogs)
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', tokenExtractor, async (req, res, next) => {
     try {
-        const blog = await Blog.create(req.body)
+        const user = await User.findByPk(req.decodedToken.id)
+        const blog = await Blog.create({...req.body, userId: user.id, date: new Date()})
         return res.json(blog)
     } catch(error) {
         next(error)
@@ -39,9 +60,15 @@ router.put('/:id', blogFinder, async (req, res, next) => {
     }
 })
 
-router.delete('/:id', blogFinder, async (req, res, next) => {
+router.delete('/:id', blogFinder, tokenExtractor, async (req, res, next) => {
     try {
-    const result = await req.blog.destroy()
+    const user = await User.findByPk(req.decodedToken.id)
+    const result = await Blog.findByPk(req.params.id)
+    if (result.userId !== user.id) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    } else {
+        await result.destroy()
+    }
     if (result) {
         return res.status(200).json({ message: 'Blog deleted successfully' });
     } else {
