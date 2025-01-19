@@ -9,8 +9,6 @@ Blog.belongsTo(User)
 
 
 const initializeAndLogBlogsAndUsers = async () => {
-  await User.sync({ alter: true })
-  await Blog.sync({ alter: true })
   const sqlFilePath = join(__dirname, '../commands.sql');
   const sqlCommands = readFileSync(sqlFilePath, 'utf8');
   await sequelize.query(sqlCommands)
@@ -25,9 +23,10 @@ const initializeAndLogBlogsAndUsers = async () => {
     }
 }
   
-initializeAndLogBlogsAndUsers()
+// initializeAndLogBlogsAndUsers()
 
 module.exports = {
     Blog,
-    User
+    User,
+    initializeAndLogBlogsAndUsers
 }
