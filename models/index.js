@@ -1,5 +1,6 @@
 const Blog = require('./blog')
 const User = require('./user')
+const ReadingList = require('./reading_list_item')
 const { readFileSync } = require('fs')
 const { join } = require('path')
 const { sequelize } = require('../utils/db')
@@ -7,6 +8,8 @@ const { sequelize } = require('../utils/db')
 User.hasMany(Blog)
 Blog.belongsTo(User)
 
+Blog.belongsToMany(User, { through: ReadingList, as: 'readingListBlogs', foreignKey: 'blog_id' });
+User.belongsToMany(Blog, { through: ReadingList, as: 'readingList', foreignKey: 'user_id' });
 
 const initializeAndLogBlogsAndUsers = async () => {
   const sqlFilePath = join(__dirname, '../commands.sql');
@@ -27,6 +30,7 @@ const initializeAndLogBlogsAndUsers = async () => {
 
 module.exports = {
     Blog,
+    ReadingList,
     User,
     initializeAndLogBlogsAndUsers
 }
