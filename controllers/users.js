@@ -56,6 +56,31 @@ router.put('/:username', userFinder, async (req, res, next) => {
     }
 })
 
+router.get('/:id', async (req, res) => {
+    const readStatus = req.query.read === 'true' ? true : req.query.read === 'false' ? false : null;
+    const users = await User.findOne({
+        where: {
+            id: req.params.id
+        },
+        include: [
+            // {
+            //   model: Blog
+            // },
+            {
+              model: Blog,
+              as: 'readingList',
+              through: {
+                attributes: ['id', 'read_status'],
+                where: readStatus !== null ? { read_status: readStatus } : {}
+              },
+            }
+          ],
+          attributes: [], // Exclude other user attribute
+      })
+
+    res.json(users)
+})
+
 // router.delete('/:id', userFinder, async (req, res, next) => {
 //     try {
 //     const result = await req.user.destroy()
