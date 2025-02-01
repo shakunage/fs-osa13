@@ -3,15 +3,10 @@ const { DataTypes } = require('sequelize')
 module.exports = {
   up: async ({ context: queryInterface }) => {
     await queryInterface.addColumn('users', 'disabled', {
-      type: DataTypes.DATE, 
+      type: DataTypes.BOOLEAN, 
       allowNull: false,
-      defaultValue: new Date()
-    })
-  },
-  down: async ({ context: queryInterface }) => {
-    await queryInterface.removeColumn('users', 'disabled')
-  },
-  up: async ({ context: queryInterface }) => {
+      defaultValue: false
+    }),
     await queryInterface.createTable('auth_tokens', {
       id: {
         type: DataTypes.INTEGER,
@@ -43,8 +38,9 @@ module.exports = {
         defaultValue: DataTypes.NOW
       }
     });
-  },
+},
   down: async ({ context: queryInterface }) => {
+    await queryInterface.removeColumn('users', 'disabled');
     await queryInterface.dropTable('auth_tokens');
   }
 }

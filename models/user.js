@@ -25,7 +25,10 @@ User.init({
   sequelize,
   underscored: true,
   timestamps: true,
-  modelName: 'user'
+  modelName: 'user',
+  defaultScope: {
+    attributes: { disabled: false }
+  }
 })
 
 module.exports = User

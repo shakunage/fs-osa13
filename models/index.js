@@ -1,3 +1,4 @@
+const AuthToken = require('./auth_token')
 const Blog = require('./blog')
 const User = require('./user')
 const ReadingList = require('./reading_list_item')
@@ -7,6 +8,9 @@ const { sequelize } = require('../utils/db')
 
 User.hasMany(Blog)
 Blog.belongsTo(User)
+
+AuthToken.belongsTo(User)
+User.hasMany(AuthToken)
 
 Blog.belongsToMany(User, { through: ReadingList, as: 'readingListBlogs', foreignKey: 'blog_id' });
 User.belongsToMany(Blog, { through: ReadingList, as: 'readingList', foreignKey: 'user_id' });
@@ -29,6 +33,7 @@ const initializeAndLogBlogsAndUsers = async () => {
 // initializeAndLogBlogsAndUsers()
 
 module.exports = {
+    AuthToken,
     Blog,
     ReadingList,
     User,

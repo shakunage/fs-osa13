@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { AuthToken, User } = require('../models');
 
 const router = express.Router();
 const SECRET_KEY = 'your_secret_key'; // Replace with a secure secret key
@@ -24,6 +24,7 @@ router.post('/', async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
+    await AuthToken.create({ token, user_id: user.id });
     res.json({ token });
   } catch (err) {
     res.status(500).json({ message: 'Something went wrong', error: err.message });
